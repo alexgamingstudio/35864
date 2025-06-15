@@ -196,7 +196,7 @@
   <div id="liste"></div>
 </section>
 
-<button href="shop.html">Jetzt Vollversion kaufen</button>
+<button id="goToShop" type="button" onclick="window.location.href='shop.html'">Jetzt Vollversion kaufen</button>
 
 <audio id="alarmTon" src="https://bigsoundbank.com/UPLOAD/mp3/1482.mp3" preload="auto"></audio>
 <audio id="abbruchTon" src="https://freesound.org/data/previews/341/341695_3248244-lq.mp3" preload="auto"></audio>
@@ -272,67 +272,69 @@
   });
   muteBtn.addEventListener("click", () => {
     tonAktiv = !tonAktiv;
-    muteBtn.textContent = tonAktiv ? "🔊 Ton aus/an" : "🔈 Ton stumm";
+    muteBtn.textContent = tonAktiv ? "🔊 Ton aus/an" : "🔈 Ton aus/an";
+    if (!tonAktiv) {
+      alarmTon.pause();
+      abbruchTon.pause();
+    }
   });
 
-  function scheduleEinsaetze() {
-    const intervall = 45 * 1000 + Math.random() * 30000; // ca. 45-75 Sek.
-    einsatzTimer = setTimeout(() => {
-      if (aktiviert) {
-        neuerEinsatz();
-        scheduleEinsaetze();
-      }
-    }, intervall);
-  }
-  function neuerEinsatz() {
-    const stichwort = einsatzStichworte[Math.floor(Math.random() * einsatzStichworte.length)];
-    const adresse = orte[Math.floor(Math.random() * orte.length)];
-    const datum = new Date();
-    const uhrzeit = datum.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-    showAlarm(stichwort, adresse, uhrzeit, false);
-    addArchivEintrag(uhrzeit, stichwort, adresse);
-  }
   function probeAlarm() {
-    const datum = new Date();
-    const uhrzeit = datum.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-    showAlarm("Probealarm", probealarmAdresse, uhrzeit, false);
+    if (!aktiviert) return;
+    zeigeAlarm("Probealarm", probealarmAdresse, aktuelleUhrzeit());
+    if (tonAktiv) alarmTon.play();
+  }
+  function scheduleEinsaetze() {
+    if (!aktiviert) return;
+    einsatzTimer = setTimeout(() => {
+      let indexStichwort = Math.floor(Math.random() * einsatzStichworte.length);
+      let indexOrt = Math.floor(Math.random() * orte.length);
+      zeigeAlarm(einsatzStichworte[indexStichwort], orte[indexOrt], aktuelleUhrzeit());
+      if (tonAktiv) alarmTon.play();
+      scheduleEinsaetze();
+    }, Math.random() * 300000 + 150000);
   }
   function scheduleProbealarmJedenFreitag() {
-    // Berechne nächste Freitag 18 Uhr
-    const jetzt = new Date();
-    const tag = jetzt.getDay();
-    const tageBisFreitag = (5 - tag + 7) % 7 || 7; // falls heute Freitag, dann 7 Tage warten
-    const naechsterFreitag = new Date(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate() + tageBisFreitag, 18, 0, 0);
-    const msBisFreitag = naechsterFreitag.getTime() - jetzt.getTime();
+    if (!aktiviert) return;
+    let jetzt = new Date();
+    let tag = jetzt.getDay();
+    let tageBisFreitag = (5 - tag + 7) % 7;
+    if (tageBisFreitag === 0) tageBisFreitag = 7;
+    let naechsterFreitag = new Date(jetzt.getTime() + tageBisFreitag * 24 * 60 * 60 * 1000);
+    naechsterFreitag.setHours(19, 0, 0, 0);
+
+    let delay = naechsterFreitag - jetzt;
     probealarmTimer = setTimeout(() => {
       if (aktiviert) {
         probeAlarm();
         scheduleProbealarmJedenFreitag();
       }
-    }, msBisFreitag);
+    }, delay);
   }
-  function showAlarm(stichwort, adresse, uhrzeit, abbruch) {
+
+  function zeigeAlarm(stichwort, adresse, uhrzeit) {
+    alarmBox.style.display = "block";
     document.getElementById("stichwort").textContent = stichwort;
     document.getElementById("adresse").textContent = adresse;
     document.getElementById("uhrzeit").textContent = uhrzeit;
-    alarmBox.style.display = "block";
-    if (tonAktiv) {
-      if (abbruch) {
-        abbruchTon.play();
-      } else {
-        alarmTon.play();
-      }
-    }
+
+    // Archiv eintragen
+    let eintrag = document.createElement("div");
+    eintrag.className = "einsatz";
+    eintrag.textContent = `${uhrzeit} - ${stichwort} @ ${adresse}`;
+    liste.prepend(eintrag);
   }
-  function addArchivEintrag(uhrzeit, stichwort, adresse) {
-    const div = document.createElement("div");
-    div.classList.add("einsatz");
-    div.textContent = `${uhrzeit} - ${stichwort} - ${adresse}`;
-    liste.prepend(div);
+
+  function aktuelleUhrzeit() {
+    const jetzt = new Date();
+    return jetzt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
   }
+
+  // Beispielhafte Detailansicht
   function anzeigen() {
-    alert("Detaillierte Einsatzansicht ist in dieser Demo nicht verfügbar.");
+    alert("Einsatzdetails sind noch nicht implementiert.");
   }
+  window.anzeigen = anzeigen; // global verfügbar machen
 </script>
 </body>
 </html>
