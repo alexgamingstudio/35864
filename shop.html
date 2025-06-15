@@ -2,12 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Piepser Webapp – Vollversion kaufen | Alex Gaming Studios™</title>
+<title>Piepser Webapp Shop</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #121212;
+    background-color: #121212;
     color: #eee;
     margin: 0;
     padding: 2rem;
@@ -17,12 +16,14 @@
     min-height: 100vh;
   }
   header {
-    max-width: 700px;
     width: 100%;
+    max-width: 600px;
     margin-bottom: 2rem;
-    border-bottom: 2px solid #f44336;
+    border-bottom: 2px solid #4caf50;
     padding-bottom: 0.5rem;
-    color: #f44336;
+    display: flex;
+    justify-content: center;
+    color: #4caf50;
   }
   header h1 {
     margin: 0;
@@ -31,87 +32,53 @@
     user-select: none;
   }
   main {
-    max-width: 700px;
     width: 100%;
+    max-width: 600px;
     background-color: #1e1e1e;
     border-radius: 12px;
     padding: 2rem;
-    box-shadow: 0 0 20px #f44336;
-  }
-  h2 {
-    color: #ff7961;
-    margin-top: 0;
-    font-weight: 700;
-  }
-  p {
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-  }
-  .price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #f44336;
-    margin-bottom: 2rem;
-  }
-  button {
-    background-color: #f44336;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(244,67,54,0.9);
-    transition: background-color 0.3s ease;
-    user-select: none;
-  }
-  button:hover {
-    background-color: #d32f2f;
-    box-shadow: 0 0 25px rgba(211,47,47,1);
-  }
-  footer {
-    margin-top: 3rem;
-    max-width: 700px;
-    width: 100%;
-    color: #666;
-    font-size: 0.9rem;
+    box-shadow: 0 0 12px #4caf50;
     text-align: center;
   }
-  @media (max-width: 480px) {
-    body {
-      padding: 1rem;
-    }
-    main, header, footer {
-      max-width: 100%;
-    }
-    button {
-      width: 100%;
-      padding: 1rem 0;
-      font-size: 1rem;
-    }
+  main h2 {
+    margin-top: 0;
+    color: #81c784;
+  }
+  main p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+  #buyBtn {
+    background-color: #4caf50;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 8px;
+    color: #121212;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 0 15px #4caf50;
+    user-select: none;
+  }
+  #buyBtn:hover {
+    background-color: #388e3c;
+    box-shadow: 0 0 22px #388e3c;
   }
 </style>
 </head>
 <body>
 <header>
-  <h1>Piepser Webapp – Vollversion kaufen</h1>
+  <h1>Piepser Webapp Shop</h1>
 </header>
 <main>
-  <h2>Professionelle Alarm-App für Feuerwehren</h2>
-  <p>Erhalte die Vollversion der Piepser Webapp von Alex Gaming Studios™ mit erweiterten Funktionen und Support.  
-  Perfekt für Feuerwehren, Einsatzkräfte und Organisationen, die realistische Alarm-Simulationen benötigen.</p>
-  <p class="price">Preis: 14,99 €</p>
-  <button href="https://github.com/alexgamingstudio/75861616222957389568">Jetzt kaufen</button>
+  <h2>Vollversion kaufen</h2>
+  <p>Mit der Vollversion erhältst du alle Funktionen und laufende Updates.</p>
+  <button id="buyBtn" type="button">Jetzt kaufen</button>
 </main>
-<footer>
-  &copy; 2025 Alex Gaming Studios™ – Alle Rechte vorbehalten.
-</footer>
 
 <script>
   document.getElementById('buyBtn').addEventListener('click', () => {
-    // Weiterleitung zur GitHub-Seite
     window.location.href = "https://github.com/alexgamingstudio/75861616222957389568";
   });
 </script>
