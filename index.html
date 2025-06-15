@@ -154,11 +154,30 @@
     .einsatz:hover {
       background-color: #2b2b2b;
     }
+    footer {
+      margin-top: auto;
+      padding: 1rem 0;
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      user-select: none;
+    }
+    footer a {
+      color: #f44336;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    footer a:hover {
+      color: #ff7961;
+      text-decoration: underline;
+    }
     @media (max-width: 480px) {
       body {
         padding: 1rem;
       }
-      #alarm, #archiv, #controls, header {
+      #alarm, #archiv, #controls, header, footer {
         max-width: 100%;
       }
       button {
@@ -170,11 +189,8 @@
         min-width: 100%;
       }
       footer {
-      margin: 0;
-      font-weight: 700;
-      font-size: 1.6rem;
-      user-select: none;
-    }
+        font-size: 1.6rem;
+      }
     }
   </style>
 </head>
@@ -224,7 +240,6 @@
     "Person im Wasser"
   ];
 
-  // Realistischere und echte Straßen in Nideggen & Ortsteilen
   const orte = [
     "Monschauer Str. 65, 52385 Nideggen (Feuerwehr Gerätehaus)",
     "Froitscheidter Str. 19, 52385 Nideggen",
@@ -317,122 +332,63 @@
 
   function startEinsaetze() {
     if (einsatzIntervall) clearInterval(einsatzIntervall);
-
-    // Start mit zufälligem Intervall, aber nur zwischen 6-22 Uhr
-    function planenNächstenEinsatz() {
-      const jetzt = new Date();
-      const stunde = jetzt.getHours();
-
-      if (stunde >= 6 && stunde < 22) {
+    einsatzIntervall = setInterval(() => {
+      if (aktiviert) {
         zufallsEinsatz();
-        einsatzIntervall = setInterval(() => {
-          const jetzt = new Date();
-          const stunde = jetzt.getHours();
-          if (stunde >= 6 && stunde < 22) {
-            zufallsEinsatz();
-          } else {
-            // außerhalb der Einsatzzeit, Intervall anhalten
-            clearInterval(einsatzIntervall);
-            einsatzIntervall = null;
-            // Warte bis 6 Uhr morgens, dann starte neu
-            const jetztMs = jetzt.getTime();
-            const morgen6 = new Date(jetzt);
-            morgen6.setHours(6,0,0,0);
-            if (morgen6.getTime() <= jetztMs) morgen6.setDate(morgen6.getDate()+1);
-            const diff = morgen6.getTime() - jetztMs;
-            setTimeout(() => {
-              if (aktiviert) startEinsaetze();
-            }, diff);
-          }
-        }, zufallsIntervall(30000, 90000));
-      } else {
-        // Warte bis 6 Uhr morgens, dann starte neu
-        const jetztMs = jetzt.getTime();
-        const morgen6 = new Date(jetzt);
-        morgen6.setHours(6,0,0,0);
-        if (morgen6.getTime() <= jetztMs) morgen6.setDate(morgen6.getDate()+1);
-        const diff = morgen6.getTime() - jetztMs;
-        setTimeout(() => {
-          if (aktiviert) startEinsaetze();
-        }, diff);
       }
-    }
-    planenNächstenEinsatz();
-  }
-
-  function zufallsIntervall(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    }, 60000); // alle 60 Sekunden neuer Einsatz
   }
 
   function zufallsEinsatz() {
-    if (!aktiviert) return;
-    if (aktuellerEinsatzAktiv) return; // nur ein Einsatz gleichzeitig
-
-    const stichwort = einsatzStichworte[Math.floor(Math.random() * einsatzStichworte.length)];
-
-    // Einsatzorte ohne Gerätehaus (Probealarm-Adresse)
-    const einsatzOrte = orte.filter(o => o !== probealarmAdresse);
-
-    // Realistische Wahrscheinlichkeit, dass Froitscheidter Str. 19 (Easteregg) seltener erscheint
-    let adresse;
-    if (Math.random() < 0.05) {
-      adresse = "Froitscheidter Str. 19, 52385 Nideggen";
-    } else {
-      const andereOrte = einsatzOrte.filter(o => o !== "Froitscheidter Str. 19, 52385 Nideggen");
-      adresse = andereOrte[Math.floor(Math.random() * andereOrte.length)];
-    }
-
+    aktuellerEinsatzAktiv = true;
     const jetzt = new Date();
     const uhrzeit = jetzt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    const stichwort = einsatzStichworte[Math.floor(Math.random() * einsatzStichworte.length)];
+    const adresse = orte[Math.floor(Math.random() * orte.length)];
 
     document.getElementById("stichwort").innerText = stichwort;
     document.getElementById("adresse").innerText = adresse;
     document.getElementById("uhrzeit").innerText = uhrzeit;
+
     alarmBox.style.display = "block";
-    aktuellerEinsatzAktiv = true;
-
-    // Easteregg bei Froitscheidter Str. 19
-    if (adresse.startsWith("Froitscheidter Str. 19")) {
-      setTimeout(() => {
-        alert("🎉 Easteregg: Der Einsatz an der Froitscheidter Str. 19 ist besonders – Achtung, Feuerwehrleute tanzen den Löschzug-Boogie! 🕺🔥");
-      }, 700);
+    if (tonAktiv) {
+      alarmTon.pause();
+      alarmTon.currentTime = 0;
+      alarmTon.play();
     }
-
-    if (tonAktiv) alarmTon.play();
-
-    addArchivEintrag(uhrzeit, stichwort, adresse);
   }
 
   function abbrechenEinsatz() {
-    alarmBox.style.display = "none";
     aktuellerEinsatzAktiv = false;
+    alarmBox.style.display = "none";
     if (!alarmTon.paused) alarmTon.pause();
     alarmTon.currentTime = 0;
+    addArchivEintrag("Einsatz abgebrochen");
   }
 
-  function addArchivEintrag(uhrzeit, stichwort, adresse) {
-    const eintrag = document.createElement("div");
-    eintrag.classList.add("einsatz");
-    eintrag.textContent = `[${uhrzeit}] ${stichwort} – ${adresse}`;
-    liste.prepend(eintrag);
-
-    // Archiv max 50 Einträge
-    if (liste.children.length > 50) {
-      liste.removeChild(liste.lastChild);
-    }
+  function addArchivEintrag(text) {
+    const jetzt = new Date();
+    const zeitString = jetzt.toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+    const div = document.createElement("div");
+    div.classList.add("einsatz");
+    div.textContent = `${zeitString} - ${text}`;
+    liste.prepend(div);
   }
 
   function anzeigen() {
     alert(
-      `Einsatzdetails:\n` +
       `Stichwort: ${document.getElementById("stichwort").innerText}\n` +
       `Adresse: ${document.getElementById("adresse").innerText}\n` +
       `Uhrzeit: ${document.getElementById("uhrzeit").innerText}`
     );
   }
+
 </script>
-  <footer>
-    <a href="index2.html">Realistische Simulation</a>
-  </footer>
+
+<footer>
+  <a href="index2.html" aria-label="Zur zweiten Seite wechseln">Zur zweiten Seite</a>
+</footer>
+
 </body>
 </html>
